@@ -14,24 +14,12 @@ jobs:
   claude:
     if: |
       (github.event_name == 'issue_comment' &&
-       (github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'MEMBER' ||
-        github.event.comment.author_association == 'COLLABORATOR') &&
        contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review_comment' &&
-       (github.event.comment.author_association == 'OWNER' ||
-        github.event.comment.author_association == 'MEMBER' ||
-        github.event.comment.author_association == 'COLLABORATOR') &&
        contains(github.event.comment.body, '@claude')) ||
       (github.event_name == 'pull_request_review' &&
-       (github.event.review.author_association == 'OWNER' ||
-        github.event.review.author_association == 'MEMBER' ||
-        github.event.review.author_association == 'COLLABORATOR') &&
        contains(github.event.review.body, '@claude')) ||
       (github.event_name == 'issues' &&
-       (github.event.issue.author_association == 'OWNER' ||
-        github.event.issue.author_association == 'MEMBER' ||
-        github.event.issue.author_association == 'COLLABORATOR') &&
        (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     timeout-minutes: 45
     runs-on: ubuntu-latest
@@ -55,13 +43,15 @@ jobs:
 
       - name: Run Claude Code
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN || secrets.CLAUDE_MAX_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_bots: 'claude[bot]'
           additional_permissions: |
             actions: read
           claude_args: |
-            --model claude-opus-4-7
+            --model claude-sonnet-4-6
             --max-turns 250
             --allowedTools "Bash(git:*),Bash(gh:*),Bash(matlab:*),Bash(octave:*),Bash(find:*),Bash(rg:*),Bash(sed:*),Bash(ls:*),Bash(pwd:*),Bash(cat:*)"
             --system-prompt "Always read and follow AGENTS.md before starting work. Keep changes small, MATLAB-native, and consistent with existing EEGLAB helpers. You can commit and push changes. Before submitting changes, run the narrowest relevant MATLAB or Octave validation command; report exactly what passed or failed. Always commit and push changes, even if validation cannot run or fails."
@@ -70,9 +60,6 @@ jobs:
     if: |
       github.event_name == 'issues' &&
       github.event.action == 'opened' &&
-      (github.event.issue.author_association == 'OWNER' ||
-       github.event.issue.author_association == 'MEMBER' ||
-       github.event.issue.author_association == 'COLLABORATOR') &&
       !contains(github.event.issue.body, '@claude') &&
       !contains(github.event.issue.title, '@claude')
     timeout-minutes: 60
@@ -97,8 +84,10 @@ jobs:
 
       - name: Triage Issue
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN || secrets.CLAUDE_MAX_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_bots: 'claude[bot]'
           additional_permissions: |
             actions: read
@@ -125,7 +114,7 @@ jobs:
             Always produce output: a PR for a small actionable fix, or an
             analysis comment explaining what is needed next.
           claude_args: |
-            --model claude-opus-4-7
+            --model claude-sonnet-4-6
             --max-turns 250
             --permission-mode acceptEdits
             --allowedTools "Bash(git:*),Bash(gh:*),Bash(matlab:*),Bash(octave:*),Bash(find:*),Bash(rg:*),Bash(sed:*),Bash(ls:*),Bash(pwd:*),Bash(cat:*)"
@@ -134,9 +123,6 @@ jobs:
   autofix:
     if: |
       github.event_name == 'pull_request_review' &&
-      (github.event.review.author_association == 'OWNER' ||
-       github.event.review.author_association == 'MEMBER' ||
-       github.event.review.author_association == 'COLLABORATOR') &&
       contains(github.event.review.body, 'autofix') &&
       !contains(github.event.review.body, '@claude')
     timeout-minutes: 45
@@ -162,8 +148,10 @@ jobs:
 
       - name: Apply Autofix
         uses: anthropics/claude-code-action@v1
+        env:
+          ANTHROPIC_BASE_URL: ${{ vars.ANTHROPIC_BASE_URL }}
         with:
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN || secrets.CLAUDE_MAX_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           allowed_bots: 'claude[bot]'
           prompt: |
             PR: #${{ github.event.pull_request.number }}
@@ -177,6 +165,6 @@ jobs:
             5. Commit and push changes to the PR branch.
             6. Post a comment summarizing what changed and what validation ran, prefixed with "Autofix:".
           claude_args: |
-            --model claude-opus-4-7
+            --model claude-sonnet-4-6
             --max-turns 150
             --allowedTools "Bash(git:*),Bash(gh:*),Bash(matlab:*),Bash(octave:*),Bash(find:*),Bash(rg:*),Bash(sed:*),Bash(ls:*),Bash(pwd:*),Bash(cat:*)"
