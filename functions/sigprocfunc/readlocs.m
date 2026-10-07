@@ -664,7 +664,11 @@ if ischar(filename)
        eloc = rmfield(eloc, 'channum');      
    end
 else
-    if isstruct(filename)
+    % handle empty input
+    % ------------------
+    if isempty(filename)
+        eloc = struct([]);
+    elseif isstruct(filename)
         % detect Fieldtrip structure and convert it
         % -----------------------------------------
         if isfield(filename, 'pnt')
@@ -682,7 +686,7 @@ else
         end
     else
         disp('readlocs(): input variable must be a string or a structure');
-    end;        
+    end;
 end
 if ~isempty(g.elecind)
 	eloc = eloc(g.elecind);
@@ -721,7 +725,11 @@ for index = 1:length(eloc)
         eloc(index).labels = int2str(eloc(index).labels);
     end
 end
-labels = { eloc.labels };
+if isempty(eloc)
+    labels = {};
+else
+    labels = { eloc.labels };
+end
 if isfield(eloc, 'ignore')
     eloc = rmfield(eloc, 'ignore');
 end
