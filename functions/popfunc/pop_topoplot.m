@@ -89,10 +89,10 @@ if nargin < 2
    typeplot = 1;
 end
 if typeplot == 0 && isempty(EEG.icasphere)
-   disp('Error: no ICA data for this set, first run ICA'); return;
-end 
+   errordlg2('No ICA data for this set, first run ICA'); return;
+end
 if isempty(EEG.chanlocs) && ~isfield(EEG, 'chanmatrix')
-   disp('Error: cannot plot topography without channel location file'); return;
+   errordlg2('Cannot plot topography without channel location file'); return;
 end
 
 if nargin < 3
@@ -192,16 +192,13 @@ isaninteger = @(x) mod(x, 1) == 0;
 if isfield(EEG, 'chanmatrix')
     if isempty(EEG.chanmatrix)
         if exist('curfig','var') && ishandle(curfig), close(curfig); end
-        disp('Error: EEG.chanmatrix is empty. See >> help topoplot');return;
+        errordlg2('EEG.chanmatrix is empty. See >> help topoplot');return;
     end
     if ~all(isaninteger(EEG.chanmatrix(:)))
         if exist('curfig','var') && ishandle(curfig), close(curfig); end
-        disp('Error: EEG.chanmatrix must contain channel indices. See >> help topoplot');return;
+        errordlg2('EEG.chanmatrix must contain channel indices. See >> help topoplot');return;
     end
     options = { options{:} 'gridplot' EEG.chanmatrix};
-elseif isempty(EEG.chanlocs)
-    if exist('curfig','var') && ishandle(curfig), close(curfig); end
-    disp('Error: cannot plot topography without channel location file'); return;
 end
 
 % find maplimits
