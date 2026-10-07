@@ -356,7 +356,7 @@ if nargs < 2
   end
 end
 if isempty(loc_file)
-  loc_file = 0;
+  error('Channel locations are required. Use pop_chanedit() to add channel locations or provide a channel location file.');
 end
 if isnumeric(loc_file) && loc_file == 0
   loc_file = DEFAULT_ELOC;
@@ -687,7 +687,7 @@ if ~strcmpi(STYLE,'grid')                     % if not plot grid only
 
 %
 %%%%%%%%%%%%%%%%%%%% Read the channel location information %%%%%%%%%%%%%%%%%%%%%%%%
-% 
+%
   if ischar(loc_file)
       [tmpeloc labels Th Rd indices] = readlocs( loc_file);
   elseif isstruct(loc_file) % a locs struct
